@@ -2,12 +2,13 @@ name: Movie Booking Checker
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # Runs every 10 minutes
+    - cron: '*/1 * * * *'  # Runs every 1 minute (minimum allowed in GitHub Actions)
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
   check_booking:
     runs-on: ubuntu-latest
+    timeout-minutes: 5  # Stops job after 5 minutes to prevent infinite loops
 
     steps:
       - name: Checkout Repository
@@ -16,16 +17,21 @@ jobs:
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Match your script's Python version
+          python-version: '3.9'  # Adjust if needed
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 simpleaudio
 
-      - name: Run Booking Checker
+      - name: Run Booking Checker in Loop (30s interval)
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          python telegram_bot.py
+          for i in {1..10}  # Runs 10 times (~5 minutes)
+          do
+            python telegram_bot.py
+            echo "Waiting 30 seconds before next check..."
+            sleep 30
+          done
