@@ -24,3 +24,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 simpleaudio
+          
+      - name: Run Booking Checker in Loop (30s interval)
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          for i in {1..10}  # Runs 10 times (~5 minutes)
+          do
+            python telegram_bot.py
+            echo "Waiting 30 seconds before next check..."
+            sleep 30
+          done
